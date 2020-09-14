@@ -1,7 +1,10 @@
 import { createStore } from "vuex";
+// import { IForm } from '../utils/formInterface';
 
 export default createStore({
-  state: {},
+  state: {
+    formData: {}
+  },
   mutations: {},
   actions: {},
   modules: {}
