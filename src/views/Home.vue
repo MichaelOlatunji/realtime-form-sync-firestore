@@ -1,6 +1,6 @@
 <template>
-  <div class="home">
-    <h1 class=""></h1>
+  <div class="home pt-8">
+    <h1 class="uppercase font-bold pb-4 text-2xl">Realtime form</h1>
     <div class="grid justify-center pt-8 bg-blue-200 rounded-lg mx-8">
       <div class="grid justify-center pb-8">
         <div class="bg-green-400 py-3 text-white font-bold text-center px-6 rounded" v-if="status === 'synced'">
