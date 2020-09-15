@@ -16,13 +16,13 @@ export default createStore({
     formData: {}
   } as IState,
   getters: {
-    get_status: state => state.status
+    getStatus: state => state.status
   },
   mutations: {
-    set_status(state, payload){
+    setStatus(state, payload){
       state.status = payload;
     },
-    set_error(state, payload){
+    setError(state, payload){
       state.status = 'error';
       state.errorMessage = payload;
     },
@@ -33,30 +33,36 @@ export default createStore({
       return bindFirestoreRef('users', db.collection('users'))
     }),
     addForm: firestoreAction( async (context, payload) => {
+      context.commit('setStatus', 'loading');
       try{
         await db.collection('users').doc("mike").set(payload);
-        context.commit('set_status', 'success')
+        context.commit('setStatus', 'success')
       } catch(error){
-        context.commit('set_error', error.message);
+        context.commit('setError', error.message);
       }
     }),
     updateForm: firestoreAction( async (context, payload: IForm) => {
+      context.commit('setStatus', 'loading');
       try{
         await db.collection('users').doc("mike").set(payload);
-        context.commit('set_status', 'synced')
+        context.commit('setStatus', 'synced')
       } catch(error){
-        context.commit('set_error', error.message);
+        context.commit('setError', error.message);
       }
     }),
     getForm: firestoreAction( async (context) => {
-        return db.collection('users').doc("mike").get();
+        context.commit('setStatus', 'loading');
+        const data = await db.collection('users').doc("mike").get();
+        context.commit('setStatus', 'synced');
+        return data;
     }),
     deleteForm: firestoreAction( async (context) => {
+      context.commit('setStatus', 'loading');
       try{
         await db.collection('users').doc("mike").delete();
-        context.commit('set_status', 'deleted')
+        context.commit('setStatus', 'deleted')
       } catch(error){
-        context.commit('set_error', error.message);
+        context.commit('setError', error.message);
       }
     })
   },
