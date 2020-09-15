@@ -1,9 +1,22 @@
 <template>
   <div class="home">
     <h1 class=""></h1>
-    {{formData}}
-    {{status}}
     <div class="grid justify-center pt-8 bg-blue-200 rounded-lg mx-8">
+      <div class="grid justify-center pb-8">
+        <div class="bg-green-400 py-3 text-white font-bold text-center px-6 rounded" v-if="status === 'synced'">
+          Form data synced with Firestore
+        </div>
+        <div class="bg-blue-400 py-3 text-white font-bold text-center px-6 rounded" v-else-if="status === 'loading'">Loading...</div>
+        <div class="bg-yellow-400 py-3 text-white font-bold text-center px-6 rounded" v-else-if="status === 'revert'">
+          Form data is reverted to original data
+        </div>
+        <div class="bg-red-400 py-3 text-white font-bold text-center px-6 rounded" v-else-if="status === 'deleted'">
+          Form data is deleted from firestore
+        </div>
+        <div class="bg-red-400 py-3 text-white font-bold text-center px-6 rounded" v-else-if="status === 'error'">
+          Failed to write to Firestore. {{ errorMessage }}
+        </div>
+      </div>
       <form class="w-full max-w-lg px-4" @submit.prevent="updateForm" @input="update">
         <div class="flex flex-wrap -mx-3 mb-6">
           <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
@@ -82,6 +95,10 @@ export default class Home extends Vue {
 
   get status(){
     return store.getters.getStatus;
+  }
+
+  get errorMessage(){
+    return store.getters.getErrorMessage;
   }
 
   updateForm(){

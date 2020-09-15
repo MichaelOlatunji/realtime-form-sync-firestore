@@ -16,7 +16,8 @@ export default createStore({
     formData: {}
   } as IState,
   getters: {
-    getStatus: state => state.status
+    getStatus: state => state.status,
+    getErrorMessage: state => state.errorMessage
   },
   mutations: {
     setStatus(state, payload){
@@ -36,7 +37,7 @@ export default createStore({
       context.commit('setStatus', 'loading');
       try{
         await db.collection('users').doc("mike").set(payload);
-        context.commit('setStatus', 'success')
+        context.commit('setStatus', 'synced')
       } catch(error){
         context.commit('setError', error.message);
       }
@@ -45,7 +46,7 @@ export default createStore({
       context.commit('setStatus', 'loading');
       try{
         await db.collection('users').doc("mike").set(payload);
-        context.commit('setStatus', 'synced')
+        context.commit('setStatus', 'synced');
       } catch(error){
         context.commit('setError', error.message);
       }
