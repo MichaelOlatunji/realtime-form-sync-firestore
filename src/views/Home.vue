@@ -56,18 +56,21 @@
           </div>
         </div>
         <div class="flex flex-wrap justify-center pb-6">
-          <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mx-4" @click="revertToInitial">
+          <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mx-4" @click="showRevertModal">
             Revert
           </button>
           <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mx-4">
             Submit
           </button>
-          <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mx-4" @click="clearForm">
+          <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mx-4" @click="showDeleteModal">
             Delete
           </button>
         </div>
       </form>
+      
     </div>
+    <modal :showModal="displayModal" @onConfirm="revertToInitial" @onCancel="cancelRevertModa;" />
+    <modal :showModal="displayDeleteModal" @onConfirm="clearForm" @onCancel="cancelDeleteModal" />
     
   </div>
 </template>
@@ -77,8 +80,12 @@ import { Options, Vue } from "vue-class-component";
 import { IForm } from '../utils/formInterface';
 import { debounce } from 'debounce';
 import store from '../store/index';
+import modal from '../components/modal.vue';
 
 @Options({
+  components: {
+    modal
+  }
 })
 
 export default class Home extends Vue {
@@ -92,6 +99,8 @@ export default class Home extends Vue {
 
   formData: IForm = this.initialState; 
   referenceState: IForm | null = null;
+  displayModal = false;
+  displayDeleteModal = false;
 
   get status(){
     return store.getters.getStatus;
@@ -113,14 +122,32 @@ export default class Home extends Vue {
     Promise.resolve(this.updateForm())
     }, 1500);
 
-  clearForm(){
+  async clearForm(){
     this.formData = { ...this.initialState }
-    return store.dispatch("deleteForm")
+    await store.dispatch("deleteForm");
+    this.displayDeleteModal = false;
   }
 
   revertToInitial(){
-    store.commit("setSatus", "revert");
+    store.commit("setStatus", "revert");
     this.formData = { ...this.referenceState };
+    this.displayModal = false;
+  }
+
+  showRevertModal(){
+    this.displayModal = true
+  }
+
+  showDeleteModal(){
+    this.displayDeleteModal = true;
+  }
+
+  cancelRevertModal(){
+    this.displayModal = false;
+  }
+
+  cancelDeleteModal(){
+    this.displayDeleteModal = false;
   }
 
   async created(){
@@ -131,7 +158,7 @@ export default class Home extends Vue {
     }
     this.formData = { ...data };
     this.referenceState = { ...data };
-    store.commit("setSatus", "synced")
+    store.commit("setStatus", "synced")
   }
   
 }
