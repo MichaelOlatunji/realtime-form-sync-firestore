@@ -33,10 +33,10 @@ const Modal = defineComponent({
     },
     methods: {
         confirm(){
-            this.$emit('onConfirm')
+            this.$emit('onconfirm')
         },
         cancel(){
-            this.$emit('onCancel')
+            this.$emit('oncancel')
         }
     }
 })

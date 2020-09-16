@@ -69,8 +69,8 @@
       </form>
       
     </div>
-    <modal :showModal="displayModal" @onConfirm="revertToInitial" @onCancel="cancelRevertModa;" />
-    <modal :showModal="displayDeleteModal" @onConfirm="clearForm" @onCancel="cancelDeleteModal" />
+    <modal :showModal="displayModal" @onconfirm="revertToInitial" @oncancel="cancelRevertModal" />
+    <modal :showModal="displayDeleteModal" @onconfirm="clearForm" @oncancel="cancelDeleteModal" />
     
   </div>
 </template>
