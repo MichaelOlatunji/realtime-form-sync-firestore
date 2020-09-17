@@ -48,6 +48,7 @@ export default createStore({
         await db.collection('users').doc("mike").set(payload);
         context.commit('setStatus', 'synced');
       } catch(error){
+        console.log(error)
         context.commit('setError', error.message);
       }
     }),

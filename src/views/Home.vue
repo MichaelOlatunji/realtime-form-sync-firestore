@@ -76,90 +76,183 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from "vue-class-component";
+// import { Options, Vue } from "vue-class-component";
+import { ref, reactive, computed, onMounted, defineComponent } from 'vue'
 import { IForm } from '../utils/formInterface';
 import { debounce } from 'debounce';
 import store from '../store/index';
 import modal from '../components/modal.vue';
 
-@Options({
-  components: {
-    modal
+export default defineComponent({
+  name: 'Home',
+  components: {modal},
+  setup(){
+    const initialState = reactive<IForm>({
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      address: ''
+    })
+
+    const formData = ref<IForm>({ ...initialState});
+    const referenceState = ref<IForm | null>(null);
+    const displayModal = ref<boolean>(false);
+    const displayDeleteModal = ref<boolean>(false);
+
+    const status = computed(() => store.getters.getStatus);
+    const errorMessage = computed(() => store.getters.getErrorMessage);
+
+    function updateForm(){
+      return store.dispatch("updateForm", formData.value)
+    }
+
+    const debouncedUpdate = debounce(() => {
+      Promise.resolve(updateForm())
+      }, 1500);
+
+    function update(){
+      debouncedUpdate()
+    }
+
+    async function clearForm(){
+      formData.value = { ...initialState }
+      await store.dispatch("deleteForm");
+      displayDeleteModal.value = false;
+    }
+
+    function revertToInitial(){
+      store.commit("setStatus", "revert");
+      formData.value = { ...referenceState.value };
+      displayModal.value = false;
+    }
+
+    function showRevertModal(){
+      displayModal.value = true
+    }
+
+    function showDeleteModal(){
+      displayDeleteModal.value = true;
+    }
+
+    function cancelRevertModal(){
+      displayModal.value = false;
+    }
+
+    function cancelDeleteModal(){
+      displayDeleteModal.value = false;
+    }
+    
+    onMounted( async () => {
+      await store.dispatch("bindForm");
+      const data = (await store.dispatch("getForm")).data();
+      if(!data){
+        await store.dispatch("addForm", formData.value)
+      }
+      formData.value = { ...data };
+      referenceState.value = { ...data };
+      store.commit("setStatus", "synced")
+    })
+
+    return {
+      initialState,
+      formData,
+      referenceState,
+      displayModal,
+      displayDeleteModal,
+      status,
+      errorMessage,
+      updateForm,
+      update,
+      debouncedUpdate,
+      clearForm,
+      revertToInitial,
+      showRevertModal,
+      showDeleteModal,
+      cancelRevertModal,
+      cancelDeleteModal
+    }
   }
 })
 
-export default class Home extends Vue {
-  initialState: IForm = {
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    address: ''
-  }
+// @Options({
+//   components: {
+//     modal
+//   }
+// })
 
-  formData: IForm = this.initialState; 
-  referenceState: IForm | null = null;
-  displayModal = false;
-  displayDeleteModal = false;
+// export default class Home extends Vue {
+//   initialState: IForm = {
+//     firstName: '',
+//     lastName: '',
+//     email: '',
+//     phone: '',
+//     address: ''
+//   }
 
-  get status(){
-    return store.getters.getStatus;
-  }
+//   formData: IForm = this.initialState; 
+//   referenceState: IForm | null = null;
+//   displayModal = false;
+//   displayDeleteModal = false;
 
-  get errorMessage(){
-    return store.getters.getErrorMessage;
-  }
+//   get status(){
+//     return store.getters.getStatus;
+//   }
 
-  updateForm(){
-    return store.dispatch("updateForm", this.formData)
-  }
+//   get errorMessage(){
+//     return store.getters.getErrorMessage;
+//   }
 
-  update(){
-    this.debouncedUpdate()
-  }
+//   updateForm(){
+//     return store.dispatch("updateForm", this.formData)
+//   }
 
-  debouncedUpdate = debounce(() => {
-    Promise.resolve(this.updateForm())
-    }, 1500);
+//   update(){
+//     this.debouncedUpdate()
+//   }
 
-  async clearForm(){
-    this.formData = { ...this.initialState }
-    await store.dispatch("deleteForm");
-    this.displayDeleteModal = false;
-  }
+//   debouncedUpdate = debounce(() => {
+//     Promise.resolve(this.updateForm())
+//     }, 1500);
 
-  revertToInitial(){
-    store.commit("setStatus", "revert");
-    this.formData = { ...this.referenceState };
-    this.displayModal = false;
-  }
+//   async clearForm(){
+//     this.formData = { ...this.initialState }
+//     await store.dispatch("deleteForm");
+//     this.displayDeleteModal = false;
+//   }
 
-  showRevertModal(){
-    this.displayModal = true
-  }
+//   revertToInitial(){
+//     store.commit("setStatus", "revert");
+//     this.formData = { ...this.referenceState };
+//     this.displayModal = false;
+//   }
 
-  showDeleteModal(){
-    this.displayDeleteModal = true;
-  }
+//   showRevertModal(){
+//     this.displayModal = true
+//   }
 
-  cancelRevertModal(){
-    this.displayModal = false;
-  }
+//   showDeleteModal(){
+//     this.displayDeleteModal = true;
+//   }
 
-  cancelDeleteModal(){
-    this.displayDeleteModal = false;
-  }
+//   cancelRevertModal(){
+//     this.displayModal = false;
+//   }
 
-  async created(){
-    await store.dispatch("bindForm");
-    const data = (await store.dispatch("getForm")).data();
-    if(!data){
-      await store.dispatch("addForm", this.formData)
-    }
-    this.formData = { ...data };
-    this.referenceState = { ...data };
-    store.commit("setStatus", "synced")
-  }
+//   cancelDeleteModal(){
+//     this.displayDeleteModal = false;
+//   }
+
+//   async created(){
+//     await store.dispatch("bindForm");
+//     const data = (await store.dispatch("getForm")).data();
+//     if(!data){
+//       await store.dispatch("addForm", this.formData)
+//     }
+//     this.formData = { ...data };
+//     this.referenceState = { ...data };
+//     store.commit("setStatus", "synced")
+//   }
   
-}
+// }
 </script>
